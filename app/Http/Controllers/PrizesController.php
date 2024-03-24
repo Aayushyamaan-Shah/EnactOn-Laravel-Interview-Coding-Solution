@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-
 use App\Models\Prize;
-use App\Http\Requests\PrizeRequest;
+
 use Illuminate\Http\Request;
+use App\Http\Requests\PrizeRequest;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Redirect;
 
 
 
@@ -31,7 +32,17 @@ class PrizesController extends Controller
      */
     public function create()
     {
-        return view('prizes.create');
+        // The following variable is used to denote the percentage of the prize that is already utilized
+        $usedPercentage = (float) Prize::sum('probability');
+
+        // The following variable is used to denote the percentage of the prize that is yet to be utilized
+        $remainingPercentage = 100.0 - $usedPercentage;
+
+        return view('prizes.create', [
+            "msg"=>$msg,
+            "usedPercentage"=>$usedPercentage,
+            "remainingPercentage"=>$remainingPercentage,
+        ]);
     }
 
     /**
@@ -42,9 +53,18 @@ class PrizesController extends Controller
      */
     public function store(PrizeRequest $request)
     {
+
+        $probabilitySum = Prize::sum('probability');
+        $parsedProbabilityVal = floatval($request->input('probability'));
+        if($parsedProbabilityVal < 0){
+            return Redirect::back()->withErrors(['msg' => 'The probability field must not be lesser than 0%']);
+        }if($parsedProbabilityVal > $probabilitySum){
+            return Redirect::back()->withErrors(['msg' => 'The probability field must not be greater than '.(100.0 - $probabilitySum).'%']);
+        }
+
         $prize = new Prize;
         $prize->title = $request->input('title');
-        $prize->probability = floatval($request->input('probability'));
+        $prize->probability = $parsedProbabilityVal;
         $prize->save();
 
         return to_route('prizes.index');
