@@ -182,6 +182,7 @@ return [
     */
 
     'aliases' => Facade::defaultAliases()->merge([
+        'PrizeController' => App\Http\Controllers\PrizesController::class,
         // 'Example' => App\Facades\Example::class,
     ])->toArray(),
 
