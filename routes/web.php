@@ -26,6 +26,7 @@ Route::get('/', function () {
 
 // PREDEFINED
 Route::post('/simulate', '\App\Http\Controllers\PrizesController@simulate')->name('simulate');
+// Route::post('/simulate/random', '\App\Http\Controllers\PrizesController@simulateRandom')->name('simulateRandom');
 
 // PREDEFINED
 Route::post('/reset', '\App\Http\Controllers\PrizesController@reset')->name('reset');
