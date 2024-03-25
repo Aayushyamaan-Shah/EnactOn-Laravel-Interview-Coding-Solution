@@ -1,3 +1,12 @@
+@php
+    $idealDataPoints =
+    PrizeController::getIdealProbabilityDetails();
+    $actualDataPoints =
+    PrizeController::getActualProbabilityDetails();
+    // $actualDataPoints =
+    // PrizeController::getActualTrulyRandomProbabilityDetails();
+@endphp
+
 @extends('default')
 
 @section('content')
@@ -5,6 +14,55 @@
 
     @include('prob-notice')
 
+    @push('scripts')
+        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+        <script type="text/javascript">
+            google.charts.load('current', {'packages':['corechart']});
+            google.charts.setOnLoadCallback(drawIdealChart);
+            google.charts.setOnLoadCallback(drawActualChart);
+
+            function drawIdealChart() {
+
+              var data = google.visualization.arrayToDataTable([
+                ['Item', 'Probability'],
+                @foreach ($idealDataPoints as $dataPoint)
+                    ['{{$dataPoint['label']}}',{{$dataPoint['y']}}],
+                @endforeach
+              ]);
+
+              var options = {
+                // title: 'My Daily Activities',
+                legend: { position: 'top', maxLines: 6 },
+                sliceVisibilityThreshold: 0,
+                pieHole: 0.4,
+              };
+
+              var chart = new google.visualization.PieChart(document.getElementById('ideal-piechart'));
+
+              chart.draw(data, options);
+            }
+            function drawActualChart() {
+
+              var data = google.visualization.arrayToDataTable([
+                ['Item', 'Probability'],
+                @foreach ($actualDataPoints as $dataPoint)
+                    ['{{$dataPoint['label']}}',{{$dataPoint['y']}}],
+                @endforeach
+              ]);
+
+              var options = {
+                // title: 'My Daily Activities',
+                legend: { position: 'top', maxLines: 6 },
+                sliceVisibilityThreshold: 0,
+                pieHole: 0.4,
+              };
+
+              var chart = new google.visualization.PieChart(document.getElementById('actual-piechart'));
+
+              chart.draw(data, options);
+            }
+          </script>
+    @endpush
 
     <div class="container">
         <div class="row">
@@ -24,12 +82,16 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($prizes as $prize)
+                        @foreach ($prizes->sortByDesc('probability') as $prize)
                             <tr>
                                 <td>{{ $prize->id }}</td>
                                 <td>{{ $prize->title }}</td>
                                 <td>{{ $prize->probability }}</td>
-                                <td>0</td>
+                                @if ($prize->distributedPrizes->count == '')
+                                    <td>0</td>
+                                @else
+                                    <td>{{ $prize->distributedPrizes->count }}</td>
+                                @endif
                                 <td>
                                     <div class="d-flex gap-2">
                                         <a href="{{ route('prizes.edit', [$prize->id]) }}" class="btn btn-primary">Edit</a>
@@ -53,7 +115,10 @@
                     </div>
                     <div class="card-body">
                         {!! Form::open(['method' => 'POST', 'route' => ['simulate']]) !!}
+                        {{-- {!! Form::open(['method' => 'POST', 'route' => ['simulateRandom']]) !!} --}}
                         <div class="form-group">
+                            {{-- {{ csrf_field() }} --}}
+                            @csrf
                             {!! Form::label('number_of_prizes', 'Number of Prizes') !!}
                             {!! Form::number('number_of_prizes', 50, ['class' => 'form-control']) !!}
                         </div>
@@ -80,11 +145,13 @@
         <div class="row">
             <div class="col-md-6">
                 <h2>Probability Settings</h2>
-                <canvas id="probabilityChart"></canvas>
+                <div id="ideal-piechart" style="height: 600px; width: 100%;"></div>
+                {{-- <canvas id="probabilityChart"></canvas> --}}
             </div>
             <div class="col-md-6">
                 <h2>Actual Rewards</h2>
-                <canvas id="awardedChart"></canvas>
+                <div id="actual-piechart" style="height: 600px; width: 100%;"></div>
+                {{-- <canvas id="awardedChart"></canvas> --}}
             </div>
         </div>
     </div>
