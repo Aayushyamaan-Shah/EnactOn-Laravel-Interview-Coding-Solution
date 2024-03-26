@@ -79,6 +79,13 @@ php artisan serve
 ```
 The Laravel project should now be up and running locally at http://localhost:8000.
 
+## Links
+- GitHub Repo for the code: [EnactOn Laravel Interview Coding Solution](https://github.com/Aayushyamaan-Shah/EnactOn-Laravel-Interview-Coding-Solution)
+- GitHub: [Aayushyamaan Shah](https://github.com/Aayushyamaan-Shah/)
+- Portfolio Website: [My Portfolio Website](https://aayushyamaan-shah.vercel.app/)
+- Videos related to the project: [Video Folder](https://drive.google.com/drive/folders/1ZbSeTLL46pXyFGUWW6X4T5TjHcGeszKs?usp=sharing)
+- Main Project Folder: [Main Folder](https://drive.google.com/drive/folders/14ORP_s1AoA174WsD_3LkTA--b_5MWhl0?usp=sharing)
+
 ## Additional Notes
 This README serves as a basic guide to set up and run the Laravel project locally.
 
