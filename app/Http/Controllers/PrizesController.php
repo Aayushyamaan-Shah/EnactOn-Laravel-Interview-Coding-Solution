@@ -168,7 +168,7 @@ class PrizesController extends Controller
 
         $probabilitySum = Prize::sum('probability');
 
-        if(probabilitySum != 100){
+        if($probabilitySum != 100){
             return Redirect::back()->withErrors(['msg' => 'Please ensure that the probability is at 100%. Current probability '.$probabilitySum .'%, reduce/increase it by '. abs($probabilitySum - 100) .'%'])->withInput($request->all());
         }
 
