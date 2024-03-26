@@ -20,7 +20,7 @@
 		</div>
 		<div class="mb-3">
 			{{ Form::label('probability', 'Probability', ['class'=>'form-label']) }}
-			{{ Form::number('probability', null, array('class' => 'form-control','min' => '0','max' => '100', 'placeholder' => '0 - 100','step' => '0.01')) }}
+			{{ Form::number('probability', null, array('class' => 'form-control','min' => '0','max' => $maxProbability, 'placeholder' => '0 - ' . $maxProbability ,'step' => '0.01')) }}
 		</div>
 
 		{{ Form::submit('Edit', array('class' => 'btn btn-primary')) }}

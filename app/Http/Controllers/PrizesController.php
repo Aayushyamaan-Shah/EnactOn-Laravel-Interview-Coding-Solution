@@ -60,10 +60,10 @@ class PrizesController extends Controller
         $probabilitySum = Prize::sum('probability');
         $parsedProbabilityVal = floatval($request->input('probability'));
         if($parsedProbabilityVal < 0){
-            return Redirect::back()->withErrors(['msg' => 'The probability field must not be lesser than 0%']);
+            return Redirect::back()->withErrors(['msg' => 'The probability field must not be lesser than 0%'])->withInput($request->all());
         }
         if(is_null($parsedProbabilityVal <= (100.00 - round($probabilitySum, 2)))){
-            return Redirect::back()->withErrors(['msg' => 'The probability field must not be greater than '.(100.0 - $probabilitySum).'%']);
+            return Redirect::back()->withErrors(['msg' => 'The probability field must not be greater than '.(100.0 - $probabilitySum).'%'])->withInput($request->all());
         }
 
         $prize = new Prize;
@@ -85,7 +85,10 @@ class PrizesController extends Controller
     public function edit($id)
     {
         $prize = Prize::findOrFail($id);
-        return view('prizes.edit', ['prize' => $prize]);
+
+        $probabilitySum = 100 - Prize::whereNotIn('id', [$id])->sum('probability');
+
+        return view('prizes.edit', ['prize' => $prize, 'maxProbability'=>$probabilitySum]);
     }
 
     /**
@@ -100,6 +103,25 @@ class PrizesController extends Controller
         $prize = Prize::findOrFail($id);
 
         $newProbability = floatval($request->input('probability'));
+        $probabilitySum = Prize::whereNotIn('id', [$id])->sum('probability');
+        $parsedProbabilityVal = floatval($request->input('probability'));
+
+        $newProbabilitySum = $probabilitySum + $parsedProbabilityVal;
+
+        if($newProbabilitySum > 100){
+            return Redirect::back()->withErrors(['msg' => 'Cannot set probability more than '. 100 - $probabilitySum .'%.'])->withInput($request->all());
+        }
+        // if($probabilitySum < 0){
+        //     return Redirect::back()->withErrors(['msg' => 'Please ensure that the prizes probability is at 100%. Current probability '.$probabilitySum .'%, increase it by '.(100 - $probabilitySum).'%'])->withInput($request->all());
+        // }
+        if($parsedProbabilityVal < 0){
+            return Redirect::back()->withErrors(['msg' => 'The probability field must not be lesser than 0%'])->withInput($request->all());
+        }
+        if(
+            is_null($parsedProbabilityVal > (100.00 - round($probabilitySum, 2)))
+        ){
+            return Redirect::back()->withErrors(['msg' => 'The probability field must not be greater than '.(100.0 - $probabilitySum).'%'])->withInput($request->all());
+        }
 
         if($newProbability != $prize->probability){
             $this::reset();
@@ -143,6 +165,13 @@ class PrizesController extends Controller
 
         $prizeCount = $request->number_of_prizes;
         $nextPrize = Prize::nextPrize();
+
+        $probabilitySum = Prize::sum('probability');
+
+        if(probabilitySum != 100){
+            return Redirect::back()->withErrors(['msg' => 'Please ensure that the probability is at 100%. Current probability '.$probabilitySum .'%, reduce/increase it by '. abs($probabilitySum - 100) .'%'])->withInput($request->all());
+        }
+
         if(is_null($nextPrize)){
             Prize::distributePrizes($prizeCount);
         }
