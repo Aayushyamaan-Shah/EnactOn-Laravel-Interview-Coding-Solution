@@ -8,6 +8,7 @@ use App\Models\DistributedPrize;
 
 use App\Models\DistributedRecords;
 use App\Http\Requests\PrizeRequest;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Models\TrulyDistributedPrize;
 use Illuminate\Support\Facades\Redirect;
@@ -60,7 +61,8 @@ class PrizesController extends Controller
         $parsedProbabilityVal = floatval($request->input('probability'));
         if($parsedProbabilityVal < 0){
             return Redirect::back()->withErrors(['msg' => 'The probability field must not be lesser than 0%']);
-        }if($parsedProbabilityVal > (100 - $probabilitySum)){
+        }
+        if(is_null($parsedProbabilityVal <= (100.00 - round($probabilitySum, 2)))){
             return Redirect::back()->withErrors(['msg' => 'The probability field must not be greater than '.(100.0 - $probabilitySum).'%']);
         }
 
